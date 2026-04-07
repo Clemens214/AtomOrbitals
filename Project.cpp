@@ -1,6 +1,3 @@
-#include <QApplication>
-#include <QMainWindow>
-
 #include <iostream>
 #include <cctype>
 
