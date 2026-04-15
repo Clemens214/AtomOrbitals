@@ -17,6 +17,10 @@ set(TS_FILES Project_de_DE.ts)
 
 add_executable(SphereViewer
     main.cpp
+    Atom.hpp
+    Coordinates.hpp
+    Orbital.hpp
+    render.hpp
 )
 
 target_link_libraries(SphereViewer PRIVATE
