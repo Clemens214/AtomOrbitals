@@ -23,6 +23,7 @@ add_executable(SphereViewer
     render.hpp
     sample.hpp
     slider.hpp
+    setup.hpp
 )
 
 target_link_libraries(SphereViewer PRIVATE

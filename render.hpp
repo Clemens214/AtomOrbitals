@@ -14,9 +14,7 @@
 #include "Orbital.hpp"
 #include "sample.hpp"
 
-// -----------------------------------------------------------------------
 // Build the point cloud for a given orbital (n, l, m)
-// -----------------------------------------------------------------------
 std::vector<Point> computePoints(int n, int l, int m, int dotCount)
 {
     Orbital orbit(n, l, m);
