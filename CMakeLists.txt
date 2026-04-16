@@ -21,6 +21,8 @@ add_executable(SphereViewer
     Coordinates.hpp
     Orbital.hpp
     render.hpp
+    sample.hpp
+    slider.hpp
 )
 
 target_link_libraries(SphereViewer PRIVATE
@@ -28,4 +30,5 @@ target_link_libraries(SphereViewer PRIVATE
     Qt6::3DCore
     Qt6::3DRender
     Qt6::3DExtras
+    Qt6::Concurrent
 )

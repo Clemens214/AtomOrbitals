@@ -49,23 +49,23 @@ class Coordinates
 
 void Coordinates::updateSpherical () {
     double r = sqrt( x()*x() + y()*y() + z()*z() );
-    setR(r);
+    mR = r;
     double theta = acos( z() / r );
-    setTheta(theta);
+    mTheta = theta;
     auto sign = [](double i) { if ( i>= 0 ) return 1; else return -1; };
     double rho = sqrt( x()*x() + y()*y() );
     double phi = sign( y() ) * acos( x() / rho );
-    setPhi(phi);
+    mPhi = phi;
     return;
 }
 
 void Coordinates::updateCartesian () {
     double x = r() * sin( theta() ) * cos( phi() );
-    setX(x);
+    mX = x;
     double y = r() * sin( theta() ) * sin( phi() );
-    setY(y);
+    mY = y;
     double z = r() * cos( theta() );
-    setZ(z);
+    mZ = z;
     return;
 }
 

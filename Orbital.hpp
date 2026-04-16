@@ -1,11 +1,11 @@
 #ifndef ORBITAL_H
 #define ORBITAL_H
 
-#define _USE_MATH_DEFINES
-
 #include <cmath>
 #include <complex>
 #include <vector>
+
+#include "Coordinates.hpp"
 
 class Orbital
 {
@@ -24,8 +24,10 @@ class Orbital
         int& setAngularNum (const int &val);
         int& setMagneticNum (const int &val);
 
-        std::vector<double> radialFunc (std::vector<double> radii);
-        std::vector<std::complex<double>> sphericalFunc (std::vector<double> thetas, std::vector<double> phis);
+        double radialFunc (double radius);
+        std::complex<double> sphericalFunc (double theta, double phi);
+
+        double probability(const double x, const double y, const double z);
 
     private:
         int principalNum = 1;
@@ -34,6 +36,7 @@ class Orbital
 
         int chargeNum = 1;
         const double bohrRadius = 5.29177210544e-11; //5.29177210544×10−11
+        const double pi = 3.14159265358979323846;
 
         unsigned long long int factorial(const int n);
         double binomial (const double n,  const double k);
@@ -89,18 +92,16 @@ double Orbital::binomial (const double n,  const double k) {
 ////////////////////////////////////////////////////////////////////////////
 
 // Radial Function
-std::vector<double> Orbital::radialFunc (std::vector<double> radii) 
+double Orbital::radialFunc (double radius) 
 {
-    std::vector<double> results(radii.size(), 0);
-    const double factor = ( 2*charge() )/( n()*bohrRadius );
-    const double preFactor = sqrt( pow(factor, 3) * factorial( n()-l()-1 )/( 2*n()*factorial( n()+l() ) ));
-    for (decltype(radii.size()) i = 0; i < radii.size(); ++i) {
-        const double expFactor = exp( -1*( factor/2 ) * radii[i] );
-        const double powFactor = pow(factor*radii[i], l());
-        const double laguerre = generalizedLaguerre(n()-l()-1, 2*l()+1, radii[i]);
-        results[i] = preFactor * expFactor * powFactor * laguerre;
-    }
-    return results;
+    double scaledRadius = bohrRadius * 1e10;
+    double factor = ( 2*charge() )/( n()* scaledRadius);
+    double preFactor = sqrt( pow(factor, 3) * factorial( n()-l()-1 )/( 2*n()*factorial( n()+l() ) ));
+    double expFactor = exp( -1*( factor/2 ) * radius );
+    double powFactor = pow(factor*radius, l());
+    double laguerre = generalizedLaguerre(n()-l()-1, 2*l()+1, factor*radius);
+    double result = preFactor * expFactor * powFactor * laguerre;
+    return result;
 }
 
 // Generalized Laguerre polynomial function L_n^m (x)
@@ -117,19 +118,16 @@ double Orbital::generalizedLaguerre(const int n, const int m, const double x)
 }
 
 // Spherical Harmonics
-std::vector<std::complex<double>> Orbital::sphericalFunc (std::vector<double> thetas, std::vector<double> phis) 
+std::complex<double> Orbital::sphericalFunc (const double theta, const double phi) 
 {
-    std::vector<std::complex<double>> results(thetas.size(), 0);
-    const double factor1 = ( 2*l() + 1 )/( 4*M_PI );
-    const double factor2 = factorial( l() - m() )/factorial( l() + m() );
-    const double preFactor = sqrt( factor1 * factor2 );
-    for (decltype(thetas.size()) i = 0; i < thetas.size(); ++i) {
-        const double legendre = generalizedLegendre(l(), m(), cos(thetas[i]) );
-        std::complex<double> phase(0.0, m()*phis[i] );
-        const std::complex<double> expFactor = exp( phase );
-        results[i] = preFactor * legendre * expFactor;
-    }
-    return results;
+    double factor1 = ( 2*l() + 1 )/( 4*pi );
+    double factor2 = factorial( l() - m() )/factorial( l() + m() );
+    double preFactor = sqrt( factor1 * factor2 );
+    double legendre = generalizedLegendre(l(), m(), cos(theta) );
+    std::complex<double> phase(0.0, m()*phi );
+    std::complex<double> expFactor = exp( phase );
+    std::complex<double> result = preFactor * legendre * expFactor;
+    return result;
 }
 
 // Generalized Legendre polynomial function P_l^m (x)
@@ -162,6 +160,17 @@ double Orbital::generalizedLegendre(const int l, const int m, const double x)
         result += factorialFactor * binomialCoefficient * binomialFactor * value;
     }
     return factor * result;
+}
+
+// occupational probability
+double Orbital::probability(const double x, const double y, const double z)
+{
+    Coordinates coord(x, y, z);
+    double radial = radialFunc( coord.r() );
+    std::complex<double> angular = sphericalFunc (coord.theta(), coord.phi() );
+    std::complex<double> waveFunc = radial * angular;
+    double absVal = std::abs(waveFunc);
+    return absVal * absVal;
 }
 
 #endif // ORBITAL_H

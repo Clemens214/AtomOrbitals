@@ -1,14 +1,11 @@
-#include <iostream>
-#include <cctype>
-#include <random>
+#ifndef SAMPLE_H
+#define SAMPLE_H
 
-#include "Atom.hpp"
-#include "Coordinates.hpp"
+#include <random>
+#include <iostream>
+
 #include "Orbital.hpp"
 
-// -----------------------------------------------------------------------
-// Rejection sampler — works with any PDF passed as a lambda
-// -----------------------------------------------------------------------
 struct Point {
     double value = 0;
     double x = 0;
@@ -16,6 +13,24 @@ struct Point {
     double z = 0;
 };
 
+float computePMax(Orbital orbit, float boxHalf, int gridRes = 50)
+{
+    float pMax = 0.0f;
+    float step = (2.0f * boxHalf) / gridRes;
+    for (int ix = 0; ix < gridRes; ++ix) {
+        for (int iy = 0; iy < gridRes; ++iy) {
+            for (int iz = 0; iz < gridRes; ++iz) {
+                float x = -boxHalf + ix * step;
+                float y = -boxHalf + iy * step;
+                float z = -boxHalf + iz * step;
+                pMax = std::max(pMax, (float)orbit.probability(x, y, z));
+            }
+        }
+    }
+    return pMax * 1.1;
+}
+
+// Rejection sampler
 std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float boxHalf)
 {
     std::mt19937 rng(42);
@@ -29,7 +44,7 @@ std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float b
         double y = spaceDist(rng);
         double z = spaceDist(rng);
         double val = orbit.probability(x, y, z);
-        if (probDist(rng) < val ) {
+        if (probDist(rng) < val) {
             Point point;
             point.value = val;
             point.x = x;
@@ -41,18 +56,4 @@ std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float b
     return points;
 }
 
-int main()
-{   
-    int dotCount = 500;
-    int n = 1, l = 0, m = 0;
-    Orbital orbit(n, l, m);
-    
-    const float pMax = 1;
-    const float boxHalf = 2;
-
-    std::cout << "Started updating points!" << std::endl;
-    std::vector<Point> points = rejectionSample(dotCount, orbit, pMax, boxHalf);
-    std::cout << "Finished updating points!" << std::endl;
-
-    return 0;
-}
+#endif // SAMPLE_H
