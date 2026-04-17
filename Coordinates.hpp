@@ -54,7 +54,8 @@ void Coordinates::updateSpherical () {
     mTheta = theta;
     auto sign = [](double i) { if ( i>= 0 ) return 1; else return -1; };
     double rho = sqrt( x()*x() + y()*y() );
-    double phi = sign( y() ) * acos( x() / rho );
+    //double phi = sign( y() ) * acos( x() / rho );
+    double phi = atan2(y(), x());
     mPhi = phi;
     return;
 }

@@ -29,12 +29,14 @@ int main(int argc, char *argv[])
     setupCamera(view, rootEntity);
 
     // Initial orbital
-    QuantumState qs;                    // n=1, l=0, m=0
+    QuantumState qs = { 3, 2, 0};
     const float dotSize  = 0.1;
-    const int   dotCount = 10000;
+    const int   dotCount = 500;
 
-    std::vector<Point> points = computePoints(qs.n, qs.l, qs.m, dotCount);
+    float count = dotCount * qs.n * qs.n;
+    std::vector<Point> points = computePoints(qs.n, qs.l, qs.m, count);
     Qt3DCore::QEntity *cloudEntity = buildCloudFromPoints(points, dotSize, rootEntity);
+    applyZoom(view->camera(), 5.0f * qs.n * qs.n);
     view->setRootEntity(rootEntity);
 
     // Embed 3D window
@@ -45,12 +47,10 @@ int main(int argc, char *argv[])
     SliderPanel panel = createSliderPanel(qs.n, qs.l, qs.m);
 
     // Top-level widget
-    QWidget *mainWidget =
-        createMainWidget(container, panel.infoLabel, panel.groupBox);
+    QWidget *mainWidget = createMainWidget(container, panel.infoLabel, panel.groupBox);
 
     // Wire everything together
-    connectSliders(panel, qs, cloudEntity, rootEntity,
-                   mainWidget, dotSize, dotCount);
+    connectSliders(panel, qs, cloudEntity, view->camera(), rootEntity, mainWidget, dotSize, dotCount);
 
     mainWidget->show();
     return app.exec();

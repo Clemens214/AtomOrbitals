@@ -5,6 +5,8 @@
 #include <Qt3DCore/QEntity>
 #include <QSlider>
 #include <QLabel>
+#include <Qt3DExtras/QForwardRenderer>
+#include <Qt3DExtras/QOrbitCameraController>
 
 #include <cctype>
 #include <cmath>
@@ -12,6 +14,7 @@
 #include <QtConcurrent>
 #include <QFutureWatcher>
 
+#include "setup.hpp"
 #include "slider.hpp"
 #include "render.hpp"
 
@@ -22,18 +25,19 @@
 // 'cloudEntity' is passed by reference so the lambda can swap it when a new cloud is ready. 
 // 'mainWidget' is used as the watcher's parent so it is cleaned up with the window.
 // -----------------------------------------------------------------------
-void connectSliders(SliderPanel       &panel,
-                    QuantumState      &qs,
-                    Qt3DCore::QEntity *&cloudEntity,
-                    Qt3DCore::QEntity  *rootEntity,
-                    QWidget            *mainWidget,
+void connectSliders(SliderPanel         &panel,
+                    QuantumState        &qs,
+                    Qt3DCore::QEntity   *&cloudEntity,
+                    Qt3DRender::QCamera *camera,
+                    Qt3DCore::QEntity   *rootEntity,
+                    QWidget             *mainWidget,
                     float               dotSize,
                     int                 dotCount)
 {
     // -----------------------------------------------------------------------
     //      Rebuilding function for the point cloud, using updated values
     // -----------------------------------------------------------------------
-    auto rebuild = [&panel, &qs, &cloudEntity, rootEntity, mainWidget, dotSize, dotCount]() 
+    auto rebuild = [&panel, &qs, &cloudEntity, camera, rootEntity, mainWidget, dotSize, dotCount]() 
     {
         // set the text of the label e.g.: n=1, l=0, m=0
         panel.infoLabel->setText(QString("Computing: n=%1  l=%2  m=%3...").arg(qs.n).arg(qs.l).arg(qs.m));
@@ -48,21 +52,22 @@ void connectSliders(SliderPanel       &panel,
 
         // create a worker to calculate the new points
         QFuture<std::vector<Point>> future = QtConcurrent::run([cn, cl, cm, dotCount]() {
-                return computePoints(cn, cl, cm, dotCount);
+            float count = dotCount * cn * cn;
+            return computePoints(cn, cl, cm, count);
         });
-
         auto *watcher = new QFutureWatcher<std::vector<Point>>(mainWidget);
         watcher->setFuture(future);
 
         // return to main thread to render the points
         QObject::connect(watcher, &QFutureWatcher<std::vector<Point>>::finished,
-                        [&cloudEntity, rootEntity, &panel, &qs, watcher, dotSize, cn, cl, cm]()
+                        [&cloudEntity, camera, rootEntity, &panel, &qs, watcher, dotSize, cn, cl, cm]()
         {
             std::vector<Point> points = watcher->result();
             watcher->deleteLater();
 
             delete cloudEntity;
             cloudEntity = buildCloudFromPoints(points, dotSize, rootEntity);
+            applyZoom(camera, 10.0f * cn);
 
             panel.infoLabel->setText(QString("Orbital: n=%1  l=%2  m=%3").arg(cn).arg(cl).arg(cm));
 

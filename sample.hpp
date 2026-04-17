@@ -30,11 +30,29 @@ float computePMax(Orbital orbit, float boxHalf, int gridRes = 50)
     return pMax * 1.1;
 }
 
+float computeRMax(Orbital orbit, float boxHalf, float pMax, int gridRes = 50)
+{
+    float RMax = 0;
+    float step = (2 * boxHalf) / gridRes;
+    for (int ix = 0; ix < gridRes; ++ix) {
+        for (int iy = 0; iy < gridRes; ++iy) {
+            for (int iz = 0; iz < gridRes; ++iz) {
+                float x = -boxHalf + ix * step;
+                float y = -boxHalf + iy * step;
+                float z = -boxHalf + iz * step;
+                if ( 0.05*pMax <= (float)orbit.probability(x, y, z) )
+                    RMax = std::max(RMax, (float)sqrt( x*x + y*y + z*z ));
+            }
+        }
+    }
+    return RMax * 1.1;
+}
+
 // Rejection sampler
-std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float boxHalf)
+std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float rMax)
 {
     std::mt19937 rng(42);
-    std::uniform_real_distribution<double> spaceDist(-boxHalf, boxHalf);
+    std::uniform_real_distribution<double> spaceDist(-rMax, rMax);
     std::uniform_real_distribution<double> probDist(0.0f, pMax);
 
     std::vector<Point> points;
