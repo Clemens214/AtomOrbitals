@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(SphereViewer VERSION 0.1 LANGUAGES CXX)
+project(AtomOrbitals VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -15,7 +15,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets 3DCore 3DRender 3DExtras)
 
 set(TS_FILES Project_de_DE.ts)
 
-add_executable(SphereViewer
+add_executable(AtomOrbitals
     main.cpp
     Atom.hpp
     Coordinates.hpp
@@ -27,7 +27,7 @@ add_executable(SphereViewer
     update.hpp
 )
 
-target_link_libraries(SphereViewer PRIVATE
+target_link_libraries(AtomOrbitals PRIVATE
     Qt6::Widgets
     Qt6::3DCore
     Qt6::3DRender
