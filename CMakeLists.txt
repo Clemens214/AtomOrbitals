@@ -24,6 +24,7 @@ add_executable(SphereViewer
     sample.hpp
     slider.hpp
     setup.hpp
+    update.hpp
 )
 
 target_link_libraries(SphereViewer PRIVATE

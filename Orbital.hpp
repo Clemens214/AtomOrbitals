@@ -7,6 +7,13 @@
 
 #include "Coordinates.hpp"
 
+// define a Quantum state struct
+struct QuantumState {
+    int n = 1;
+    int l = 0;
+    int m = 0;
+};
+
 class Orbital
 {
     public:
@@ -38,7 +45,7 @@ class Orbital
         const double bohrRadius = 5.29177210544e-11; //5.29177210544×10−11
         const double pi = 3.14159265358979323846;
 
-        unsigned long long int factorial(const int n);
+        unsigned long int factorial(const int n);
         double binomial (const double n,  const double k);
 
         double generalizedLaguerre(const int n, const int m, const double x);
@@ -70,22 +77,25 @@ int& Orbital::setMagneticNum (const int &val) {
 }
 
 // Factorial function
-unsigned long long int Orbital::factorial(const int n) {
+unsigned long int Orbital::factorial(const int n) {
     if ( n < 0  )
         throw std::runtime_error("Cannot calculate the factorial of a negative number!");
     long int f = 1;
     for (long int i=1; i<=n; ++i)
         f *= i;
-        return f;
+    return f;
 }
 
 // Binomial coefficient
 double Orbital::binomial (const double n,  const double k) {
-    if ( n != static_cast<int>(n) )
-        return 0;
-    if ( k != static_cast<int>(k) )
-        return 0;
-    double result = factorial(n)/( factorial(k) * factorial(n - k) );
+    if ( k != static_cast<int>(k) ||  k < 0)
+        throw std::runtime_error("Can only calculate the binomial coefficent for natural k's!");
+    double top = 1;
+    for (long int i=0; i <= k-1; ++i) {
+        top *= n - i;
+    }
+    double bottom = factorial(k);
+    double result = top / bottom;
     return result;
 }
 
@@ -121,7 +131,9 @@ double Orbital::generalizedLaguerre(const int n, const int m, const double x)
 std::complex<double> Orbital::sphericalFunc (const double theta, const double phi) 
 {
     double factor1 = ( 2*l() + 1 )/( 4*pi );
-    double factor2 = factorial( l() - m() )/factorial( l() + m() );
+    double topFactorial = factorial( l() - m() );
+    double bottomFactorial = factorial( l() + m() );
+    double factor2 = topFactorial / bottomFactorial;
     double preFactor = sqrt( factor1 * factor2 );
     double legendre = generalizedLegendre(l(), m(), cos(theta) );
     std::complex<double> phase(0.0, m()*phi );
@@ -148,14 +160,17 @@ double Orbital::generalizedLegendre(const int l, const int m, const double x)
     }
     // calculate the rest of the preFactor
     double twoFactor = pow(2, l);
-    double xFactor = pow( (1 - x*x), mEff/2 );
+    double xBase = 1 - x*x;
+    double xExponent = (double)mEff/2;
+    double xFactor = pow( xBase, xExponent );
     double factor = preFactor * twoFactor * xFactor;
     // calculate the sum
     double result = 0.0;
     for (int i = mEff; i <= l; ++i) {
         double factorialFactor = factorial(i) / factorial(i - mEff);
-        double binomialCoefficient = binomial(l, i);;
-        double binomialFactor = binomial((l + i - 1)/2, l);;
+        double binomialCoefficient = binomial(l, i);
+        double topFrac = (double)(l + i - 1)/2;
+        double binomialFactor = binomial(topFrac, l);
         double value = pow(x, i - m);
         result += factorialFactor * binomialCoefficient * binomialFactor * value;
     }

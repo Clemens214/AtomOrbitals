@@ -15,8 +15,8 @@ struct Point {
 
 float computePMax(Orbital orbit, float boxHalf, int gridRes = 50)
 {
-    float pMax = 0.0f;
-    float step = (2.0f * boxHalf) / gridRes;
+    float pMax = 0;
+    float step = (2 * boxHalf) / gridRes;
     for (int ix = 0; ix < gridRes; ++ix) {
         for (int iy = 0; iy < gridRes; ++iy) {
             for (int iz = 0; iz < gridRes; ++iz) {
@@ -39,6 +39,7 @@ std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float b
 
     std::vector<Point> points;
     points.reserve(count);
+    int pointNum = 0;
     while (points.size() < count) {
         double x = spaceDist(rng);
         double y = spaceDist(rng);
@@ -51,7 +52,9 @@ std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float b
             point.y = y;
             point.z = z;
             points.push_back(point);
+            pointNum++;
         }
+        // std::cout << "Number of points found: " << pointNum << std::endl;
     }
     return points;
 }

@@ -1,5 +1,6 @@
 #ifndef SETUP_H
 #define SETUP_H
+
 #include <cctype>
 #include <cmath>
 
@@ -13,6 +14,7 @@
 #include <QSlider>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QGroupBox>
 
 // Create and return the Qt3D window
 Qt3DExtras::Qt3DWindow *createView()

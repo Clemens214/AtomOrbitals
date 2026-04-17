@@ -2,49 +2,12 @@
 #include <cctype>
 #include <random>
 
-#include "Atom.hpp"
-#include "Coordinates.hpp"
-#include "Orbital.hpp"
-
-// -----------------------------------------------------------------------
-// Rejection sampler — works with any PDF passed as a lambda
-// -----------------------------------------------------------------------
-struct Point {
-    double value = 0;
-    double x = 0;
-    double y = 0;
-    double z = 0;
-};
-
-std::vector<Point> rejectionSample(int count, Orbital orbit, float pMax, float boxHalf)
-{
-    std::mt19937 rng(42);
-    std::uniform_real_distribution<double> spaceDist(-boxHalf, boxHalf);
-    std::uniform_real_distribution<double> probDist(0.0f, pMax);
-
-    std::vector<Point> points;
-    points.reserve(count);
-    while (points.size() < count) {
-        double x = spaceDist(rng);
-        double y = spaceDist(rng);
-        double z = spaceDist(rng);
-        double val = orbit.probability(x, y, z);
-        if (probDist(rng) < val ) {
-            Point point;
-            point.value = val;
-            point.x = x;
-            point.y = y;
-            point.z = z;
-            points.push_back(point);
-        }
-    }
-    return points;
-}
+#include "sample.hpp"
 
 int main()
 {   
-    int dotCount = 500;
-    int n = 1, l = 0, m = 0;
+    int dotCount = 10000;
+    int n = 4, l = 2, m = 1;
     Orbital orbit(n, l, m);
     
     const float pMax = 1;

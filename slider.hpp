@@ -1,8 +1,12 @@
 #ifndef SLIDER_H
 #define SLIDER_H
 
+#include <QWidget>
+#include <Qt3DCore/QEntity>
 #include <QSlider>
 #include <QLabel>
+#include <QVBoxLayout>
+#include <QGroupBox>
 
 #include <cctype>
 #include <cmath>
@@ -51,7 +55,7 @@ LabelledSlider makeLabelledSlider(const QString &name,
 SliderPanel createSliderPanel(const int n, const int l, const int m)
 {
     SliderPanel panel;
-    
+
     panel.groupBox = new QGroupBox("Quantum Numbers");
     auto *grid     = new QGridLayout(panel.groupBox);
     grid->setColumnStretch(1, 1);
